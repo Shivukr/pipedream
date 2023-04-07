@@ -1,0 +1,91 @@
+import pygame
+import random
+
+# initialize Pygame
+pygame.init()
+
+# set the screen size
+screen_width = 640
+screen_height = 480
+screen = pygame.display.set_mode((screen_width, screen_height))
+
+# set the game clock
+clock = pygame.time.Clock()
+
+# set the font
+font = pygame.font.Font(None, 30)
+
+# set the colors
+white = (255, 255, 255)
+black = (0, 0, 0)
+green = (0, 255, 0)
+red = (255, 0, 0)
+
+# set the snake properties
+snake_size = 10
+snake_speed = 10
+
+# set the food properties
+food_size = 10
+
+# initialize the snake
+snake = [(screen_width // 2, screen_height // 2)]
+direction = (0, -1)
+
+# initialize the food
+food_pos = (random.randint(0, screen_width // food_size - 1) * food_size,
+            random.randint(0, screen_height // food_size - 1) * food_size)
+
+# set the game loop
+running = True
+while running:
+    # handle events
+    for event in pygame.event.get():
+        if event.type == pygame.QUIT:
+            running = False
+        elif event.type == pygame.KEYDOWN:
+            if event.key == pygame.K_UP and direction != (0, 1):
+                direction = (0, -1)
+            elif event.key == pygame.K_DOWN and direction != (0, -1):
+                direction = (0, 1)
+            elif event.key == pygame.K_LEFT and direction != (1, 0):
+                direction = (-1, 0)
+            elif event.key == pygame.K_RIGHT and direction != (-1, 0):
+                direction = (1, 0)
+
+    # update the snake position
+    x, y = snake[0]
+    dx, dy = direction
+    x += dx * snake_speed
+    y += dy * snake_speed
+    if x < 0 or x >= screen_width or y < 0 or y >= screen_height:
+        running = False
+    elif (x, y) in snake[1:]:
+        running = False
+    else:
+        snake.insert(0, (x, y))
+        if (x, y) == food_pos:
+            food_pos = (random.randint(0, screen_width // food_size - 1) * food_size,
+                        random.randint(0, screen_height // food_size - 1) * food_size)
+        else:
+            snake.pop()
+
+    # draw the game objects
+    screen.fill(black)
+    pygame.draw.rect(screen, green, (food_pos[0], food_pos[1], food_size, food_size))
+    for x, y in snake:
+        pygame.draw.rect(screen, white, (x, y, snake_size, snake_size))
+
+    # update the score
+    score = len(snake) - 1
+    score_text = font.render(f"Score: {score}", True, white)
+    screen.blit(score_text, (10, 10))
+
+    # update the display
+    pygame.display.flip()
+
+    # set the game speed
+    clock.tick(30)
+
+# quit Pygame
+pygame.quit()
